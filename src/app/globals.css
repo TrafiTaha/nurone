@@ -1,26 +1,879 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* NURONE design tokens.
+   Ink neutrals with a cool bias, one flat blue accent, a condensed display grotesque
+   for headlines and Geist for reading. No glows, no gradients doing the design. */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-display), var(--font-geist-sans), ui-sans-serif, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+@theme {
+  --color-ink-950: #0b0d11;
+  --color-ink-900: #101318;
+  --color-ink-850: #14181e;
+  --color-ink-800: #1a1f26;
+  --color-ink-700: #252b34;
+  --color-line: rgb(226 232 240 / 0.09);
+  --color-line-strong: rgb(226 232 240 / 0.17);
+
+  --color-bone: #eceef1; /* primary text */
+  --color-mute: #9aa1ad; /* secondary text: 7:1 */
+  --color-dim: #6c7380; /* metadata, 4.2:1 */
+
+  --color-signal: #3b7dff; /* NURONE blue: fills, lines, the one accent */
+  --color-signal-hi: #8db6ff; /* accent text on ink: 9:1 */
+  --color-signal-ink: #5a93ff;
+  --color-live: #3ddc97;
+
+  --text-mega: clamp(2.875rem, 1.1rem + 5.4vw, 6rem);
+  --text-mega--line-height: 0.98;
+  --text-headline: clamp(2.125rem, 1.35rem + 2.4vw, 3.75rem);
+  --text-headline--line-height: 1.04;
+  --text-manifesto: clamp(2.5rem, 0.9rem + 5vw, 6.5rem);
+  --text-manifesto--line-height: 1;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sys: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ───────────────── Base ───────────────── */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    interpolate-size: allow-keywords;
+    color-scheme: dark;
+    --page-bg: #0b0d11;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 4.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--page-bg);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-signal);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-hi);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  summary {
+    list-style: none;
+  }
+
+  button:not(:disabled),
+  [role="button"],
+  summary,
+  label:has(input),
+  select {
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Designed FAQ expansion; progressive enhancement where supported. */
+  details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.5s var(--ease-expo),
+      content-visibility 0.5s allow-discrete;
+  }
+  details[open]::details-content {
+    block-size: auto;
+  }
+
+  dialog::backdrop {
+    background: rgb(11 13 17 / 0.8);
+    backdrop-filter: blur(6px);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ───────────────── Type ───────────────── */
+
+/* Display: condensed grotesque, medium weight, set tight. Headlines carry the design. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-stretch: 82%;
+  letter-spacing: -0.02em;
+}
+
+@utility type-heading {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-stretch: 88%;
+  letter-spacing: -0.012em;
+}
+
+/* Small labels read as quiet sentence-case captions, not terminal output. */
+@utility type-label {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────────────── Surfaces ───────────────── */
+/* Decorative grids retired: structure comes from the layout, not wallpaper. */
+@utility schematic-grid {
+  background-image: none;
+}
+
+@utility dot-grid {
+  background-image: none;
+}
+
+@utility ticks {
+  background-image: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px);
+}
+
+/* Depth, never neon: a wide, very low-alpha falloff. */
+@utility atmosphere {
+  background: none;
+}
+
+/* Four corner registration brackets, drawn with gradients (no extra DOM). */
+@utility brackets {
+  --b: 18px;
+  --c: rgb(214 228 255 / 0.35);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--b) no-repeat;
+}
+
+/* Hover edge light that sweeps along a card's border.
+   Technique adapted from ThreeUI Community "Gateway Flow" card (MIT, © 2026 Meng To). */
+@utility border-sheen {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(110deg, transparent 25%, rgb(99 197 255 / 0.6) 50%, transparent 75%);
+    background-size: 260% 100%;
+    background-position: 100% 0;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.4s ease,
+      background-position 1.2s var(--ease-expo);
+  }
+  &:hover::after,
+  &:focus-within::after {
+    opacity: 1;
+    background-position: 0 0;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ───────────────── Motion ─────────────────
+   Transform/opacity only. Reduced motion removes movement, never content. */
+
+@utility line-mask {
+  display: block;
+  overflow: clip;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+/* Load sequence: grid → core → orbits → nodes, typography in parallel. */
+@utility line-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: line-up 1.1s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 110ms + 150ms);
+  }
+}
+
+@utility fade-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: fade-up 0.9s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 110ms + 350ms);
+  }
+}
+
+@utility grid-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: fade 1.6s ease-out both;
+  }
+}
+
+@utility core-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: core-appear 1s var(--ease-expo) both;
+    animation-delay: 250ms;
+  }
+}
+
+@utility draw-ring {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: draw-stroke 1.6s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 160ms + 450ms);
+  }
+}
+
+@utility node-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: node-appear 0.8s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 900ms);
+  }
+}
+
+/* Scroll-driven (CSS only). */
+@utility reveal {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+@utility line-view {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: line-up linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 75%;
+    }
+  }
+}
+
+@utility draw-x {
+  transform-origin: left;
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: scale-x linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 45%;
+    }
+  }
+}
+
+@utility grow-y {
+  transform-origin: bottom;
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: scale-y linear both;
+      animation-timeline: view();
+      animation-range: entry calc(20% + var(--i, 0) * 4%) cover calc(40% + var(--i, 0) * 3%);
+    }
+  }
+}
+
+@utility segment-on {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: segment linear both;
+      animation-timeline: view();
+      animation-range: entry calc(30% + var(--i, 0) * 2.5%) cover calc(35% + var(--i, 0) * 1.6%);
+    }
+  }
+}
+
+/* Parallax layers inside a section: --depth in px of travel across the viewport. */
+@utility parallax {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: parallax linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
+/* Hero system drifts gently as the page scrolls away. */
+@utility drift-out {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      animation: drift-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+@utility scroll-progress {
+  transform-origin: left;
+  transform: scaleX(0);
+  @supports (animation-timeline: scroll()) {
+    animation: scale-x linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@utility flow-y {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: flow-y 2.4s var(--ease-sys) infinite;
+    animation-delay: calc(var(--i, 0) * 0.8s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}
+
+@utility flow-x {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: flow-x 3s var(--ease-sys) infinite;
+    animation-delay: calc(var(--i, 0) * 1s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}
+
+@utility dash-flow {
+  stroke-dasharray: 3 7;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: dash 0.9s linear infinite;
+  }
+}
+
+@utility pulse {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@utility breathe {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: breathe 6s ease-in-out infinite;
+  }
+}
+
+@utility twinkle {
+  opacity: 0.45;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: twinkle 5s ease-in-out infinite;
+  }
+}
+
+@utility spin-slow {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: spin 90s linear infinite;
+  }
+}
+
+/* The page grid breathes very slowly, never enough to read as movement. */
+@utility grid-drift {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: grid-drift 60s linear infinite;
+  }
+}
+
+@utility enter {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: fade-up 0.55s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+}
+
+/* ───────────────── Scroll scenes ─────────────────
+   See components/motion/ScrollScene. Queries mirror lib/gsap PIN_QUERY.
+   --p  scene progress · --fp frame progress · --t eased transformation inside a frame. */
+@layer components {
+  .scene,
+  .scene-stage {
+    position: relative;
+  }
+  [data-frame] {
+    --t: clamp(0, calc((var(--fp, 1) - 0.12) / 0.62), 1);
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) {
+    .scene[data-pin="always"] {
+      height: calc(var(--count) * var(--len) + 100svh);
+    }
+    .scene[data-pin="always"] > .scene-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: clip;
+    }
+    .scene[data-pin="always"] .frames {
+      display: grid;
+    }
+    .scene[data-pin="always"] .frames > [data-frame] {
+      grid-area: 1 / 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) and (min-width: 1024px) {
+    .scene[data-pin="desktop"] {
+      height: calc(var(--count) * var(--len) + 100svh);
+    }
+    .scene[data-pin="desktop"] > .scene-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: clip;
+    }
+    .scene[data-pin="desktop"] .frames {
+      display: grid;
+    }
+    .scene[data-pin="desktop"] .frames > [data-frame] {
+      grid-area: 1 / 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) {
+    .scene .frames > [data-frame] {
+      transition:
+        opacity 0.6s var(--ease-sys),
+        translate 0.9s var(--ease-expo);
+    }
+    .scene[data-pin="always"] .frames > [data-frame]:not([data-state]):not(:first-child),
+    .scene[data-pin="always"] .frames > [data-frame][data-state="future"],
+    .scene[data-pin="always"] .frames > [data-frame][data-state="past"] {
+      opacity: 0;
+      translate: 0 3rem;
+      pointer-events: none;
+      transition:
+        opacity 0.45s var(--ease-sys),
+        translate 0.9s var(--ease-expo);
+    }
+    .scene[data-pin="always"] .frames > [data-frame][data-state="past"] {
+      translate: 0 -3rem;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) and (min-width: 1024px) {
+    .scene[data-pin="desktop"] .frames > [data-frame]:not([data-state]):not(:first-child),
+    .scene[data-pin="desktop"] .frames > [data-frame][data-state="future"],
+    .scene[data-pin="desktop"] .frames > [data-frame][data-state="past"] {
+      opacity: 0;
+      translate: 0 3rem;
+      pointer-events: none;
+      transition:
+        opacity 0.45s var(--ease-sys),
+        translate 0.9s var(--ease-expo);
+    }
+    .scene[data-pin="desktop"] .frames > [data-frame][data-state="past"] {
+      translate: 0 -3rem;
+    }
+  }
+
+  /* Visibility helpers for content that only makes sense pinned (or only unpinned). */
+  .when-pinned-lg {
+    display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) and (min-width: 1024px) {
+    .when-pinned-lg {
+      display: block;
+    }
+    .unless-pinned-lg {
+      display: none;
+    }
+  }
+}
+
+/* Word-by-word light-up driven by frame progress. Set --n (word count) on the parent, --w on each word. */
+@utility word-lit {
+  opacity: clamp(0.14, calc(var(--fp, 1) * var(--n, 8) * 1.6 - var(--w, 0)), 1);
+  transition: opacity 0.25s linear;
+}
+
+/* Sequenced parts inside one frame: --k index of --of parts, lit as --fp passes them. */
+@utility seq-lit {
+  opacity: clamp(0.12, calc((var(--fp, 1) * var(--of, 3) * 1.25 - var(--k, 0)) * 2), 1);
+  translate: 0 calc((1 - clamp(0, calc((var(--fp, 1) * var(--of, 3) * 1.25 - var(--k, 0)) * 2), 1)) * 14px);
+  transition:
+    opacity 0.3s linear,
+    translate 0.3s linear;
+}
+
+/* ───────────────── Ambient layer (components/motion/Ambient) ───────────────── */
+
+/* Film grain: static SVG turbulence, tinted by blend, never animated. */
+@utility grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Spotlight border: a light that follows the pointer along a card edge, plus a faint inner wash. */
+@utility spotlight {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(280px circle at var(--mx, -999px) var(--my, -999px), rgb(99 197 255 / 0.75), transparent 65%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), rgb(59 140 255 / 0.07), transparent 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  &:hover::before,
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Outline type for the principles band and Lab numerals. */
+@utility band-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(147 163 187 / 0.35);
+}
+
+/* A quote entering: rises out of a clipped line, staggered by --i. */
+@utility voice-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: voice-in 0.9s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+}
+@keyframes voice-in {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    clip-path: inset(0 0 -20% 0);
+  }
+}
+
+/* Drifting dot texture inside the beam CTA. */
+@utility dot-drift {
+  background-image: radial-gradient(rgb(191 230 255 / 0.55) 1px, transparent 1px);
+  background-size: 12px 12px;
+  mix-blend-mode: overlay;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: dot-drift 8s linear infinite;
+  }
+}
+
+@utility comet {
+  animation: comet 1.6s linear infinite;
+  filter: drop-shadow(0 0 4px #63c5ff);
+}
+
+/* Word-by-word blur reveal (see BlurWords). */
+@utility blur-words {
+  @media (prefers-reduced-motion: no-preference) {
+    &[data-armed] .bw {
+      display: inline-block;
+      white-space: pre-wrap;
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+      filter: blur(4px);
+      transition:
+        opacity 0.7s var(--ease-expo),
+        transform 0.7s var(--ease-expo),
+        filter 0.7s var(--ease-expo);
+      transition-delay: calc(var(--w, 0) * 35ms);
+    }
+    &[data-armed][data-shown] .bw {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+}
+
+@keyframes dot-drift {
+  to {
+    background-position: 24px 24px;
+  }
+}
+
+@keyframes comet {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@utility scroll-cue {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: cue 2.2s var(--ease-sys) infinite;
+  }
+}
+
+@keyframes cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .packet {
+    display: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes grid-drift {
+  to {
+    background-position:
+      64px 64px,
+      64px 64px;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes line-up {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scale-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes scale-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes segment {
+  from {
+    opacity: 0.18;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes parallax {
+  from {
+    transform: translate3d(0, calc(var(--depth, 40px) * -1), 0);
+  }
+  to {
+    transform: translate3d(0, var(--depth, 40px), 0);
+  }
+}
+
+@keyframes drift-out {
+  to {
+    transform: translate3d(0, 60px, 0) scale(0.96);
+    opacity: 0.55;
+  }
+}
+
+@keyframes flow-y {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--travel, 56px));
+    opacity: 0;
+  }
+}
+
+@keyframes flow-x {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes draw-stroke {
+  from {
+    stroke-dashoffset: var(--len, 1600);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes node-appear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes core-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
